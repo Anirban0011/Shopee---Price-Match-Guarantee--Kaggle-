@@ -1,0 +1,9 @@
+albumentations
+black
+numpy
+pre-commit
+timm
+torch
+torchaudio
+torchvision
+torchsummary

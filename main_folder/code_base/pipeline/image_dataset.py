@@ -27,4 +27,4 @@ class SHOPEEImageDataset(Dataset):
         img = img.astype(np.float32)
         img = img.transpose(2, 0, 1) # pytorch ready NCHW
 
-        return torch.tensor(img).float()
+        return torch.tensor(img).float(), torch.tensor(row.label_group).float()

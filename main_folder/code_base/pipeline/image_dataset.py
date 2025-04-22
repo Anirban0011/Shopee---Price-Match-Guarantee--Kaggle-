@@ -16,7 +16,7 @@ class SHOPEEImageDataset(Dataset):
 
     def __getitem__(self, index):
         row = self.df.loc[index]
-        img = cv2.imread(f"{dir}/{row.image}")
+        img = cv2.imread(f"{self.dir}/{row.image}")
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) # CV2 default BGR
         img = img.copy()
 

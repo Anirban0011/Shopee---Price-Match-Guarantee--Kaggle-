@@ -9,14 +9,14 @@ class ImgEncoder(nn.Module):
         self,
         channel_size,
         out_features,
-        dropout=0.5,
-        backbone="densenet121",
-        pretrained= True
+        dropout = 0.5,
+        backbone = "densenet121",
+        pretrained = True
     ):
         super().__init__()
         self.backbone = timm.create_model(backbone, pretrained=pretrained)
         self.channel_size = channel_size
-        self.in_features = self.backbone.classifier.in_features
+        self.in_features = self.backbone.num_features
         self.out_features = out_features
         self.arcface = ArcMarginProduct(
             in_features=self.channel_size,
@@ -36,5 +36,6 @@ class ImgEncoder(nn.Module):
         features = self.bn2(features)
         features = F.normalize(features)
         if labels is not None:
-            return self.arcface(features, labels)
+            features = self.arcface(features, labels)
+            features = nn.Softmax(features)
         return features

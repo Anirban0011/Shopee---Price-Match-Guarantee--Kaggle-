@@ -1,39 +1,55 @@
 import timm
 import torch.nn as nn
 import torch.nn.functional as F
+from timm.layers import ScaledStdConv2d, ScaledStdConv2dSame, BatchNormAct2d
 from code_base.pipeline.ArcFace import ArcMarginProduct
 
 
 class ImgEncoder(nn.Module):
-    def __init__(
-        self,
-        channel_size,
-        out_features,
-        dropout = 0.5,
-        backbone = "densenet121",
-        pretrained = True
-    ):
+    def __init__(self, num_classes, embed_size=1792, backbone=None, pretrained=True):
         super().__init__()
         self.backbone = timm.create_model(backbone, pretrained=pretrained)
-        self.channel_size = channel_size
-        self.in_features = self.backbone.num_features
-        self.out_features = out_features
+        self.embed_size = embed_size  # embedding size
+        self.out_features = num_classes  # num classes
+        if "nfnet_f0" in backbone:
+            self.backbone._modules["final_conv"] = ScaledStdConv2dSame(
+                self.backbone._modules["final_conv"].in_channels,
+                self.embed_size,
+                kernel_size=(1, 1),
+                stride=(1, 1),
+            )
+        elif "nfnet_l0" in backbone or "nfnet_l1" in backbone:
+            self.backbone._modules["final_conv"] = ScaledStdConv2d(
+                self.backbone._modules["final_conv"].in_channels,
+                self.embed_size,
+                kernel_size=(1, 1),
+                stride=(1, 1),
+            )
+        elif any(x in backbone for x in ["b5", "b6", "b7"]):
+            self.backbone._modules["conv_head"] = nn.Conv2d(
+                self.backbone._modules["conv_head"].in_channels,
+                self.embed_size,
+                kernel_size=(1, 1),
+                stride=(1, 1),
+            )
+            self.backbone._modules["bn2"] = BatchNormAct2d(
+                self.embed_size,
+                eps=self.backbone._modules["bn2"].eps,
+                affine=self.backbone._modules["bn2"].affine,
+                track_running_stats=self.backbone._modules["bn2"].track_running_stats,
+                drop_layer=type(self.backbone._modules["bn2"].drop),
+                act_layer=type(self.backbone._modules["bn2"].act),
+            )
         self.arcface = ArcMarginProduct(
-            in_features=self.channel_size,
-            out_features=self.out_features
+            in_features=self.embed_size, out_features=self.out_features
         )
-        self.bn1 = nn.BatchNorm2d(self.in_features)
-        self.dropout = nn.Dropout(dropout, inplace=True)
-        self.fc1 = nn.Linear(self.in_features * 16 * 16 , self.channel_size)
-        self.bn2 = nn.BatchNorm1d(self.channel_size)
+        self.bn = nn.BatchNorm1d(self.embed_size)
 
     def forward(self, x, labels=None):
-        features = self.backbone.features(x)
-        features = self.bn1(features)
-        features = self.dropout(features)
+        features = self.backbone.forward_features(x)
+        features = F.adaptive_avg_pool2d(features, (1, 1))
         features = features.view(features.size(0), -1)
-        features = self.fc1(features)
-        features = self.bn2(features)
+        features = self.bn(features)
         features = F.normalize(features)
         if labels is not None:
             features = self.arcface(features, labels)

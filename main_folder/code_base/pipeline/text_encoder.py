@@ -1,25 +1,39 @@
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from transformers import AutoModel
 from code_base.pipeline.ArcFace import ArcMarginProduct
 
 
 class TextEncoder(nn.Module):
-    def __init__(self, out_features, Tokenizer, backbone):
+    def __init__(self, num_classes, embed_size=1792, max_seq_length=35, backbone=None):
         super().__init__()
-        self.tokenizer = Tokenizer
-        self.backbone = backbone
-        self.out_features = out_features
-        self.in_features = self.backbone.pooler.dense.in_features
+        self.backbone_name = backbone
+        self.backbone = AutoModel.from_pretrained(backbone)
+        self.out_features = num_classes
+        self.embed_size = embed_size
         self.arcface = ArcMarginProduct(
-            in_features=self.in_features,
-            out_features=self.out_features
+            in_features=self.embed_size, out_features=self.out_features
         )
-        self.linear = nn.Linear(in_features=self.in_features, out_features=1024)
+        self.pool = nn.AvgPool2d(kernel_size=max_seq_length)
+        self.bn = nn.BatchNorm1d(self.embed_size)
 
-    def forward(self, x, labels=None):
-        features = self.tokenizer(x, return_tensors="pt")
-        features = self.backbone(**features).pooler_output
-        features = self.linear(features)
+    def forward(self, input_ids, attention_mask, labels=None):
+        if any(x in self.backbone_name for x in ["bert-base", "roberta-base"]):
+            features = self.backbone(
+                input_ids, attention_mask=attention_mask, output_hidden_states=True
+            ).hidden_states[-2:]
+            features = torch.cat([features[-1], features[-2]], dim=-1)[
+                :, :, self.embed_size
+            ]
+        else:
+            features = self.backbone(
+                input_ids, attention_mask=attention_mask
+            ).last_hidden_state
+        features = features.transpose(1, 2)
+        features = self.pool(features)
+        features = features.view(features.size(0), -1)
+        features = self.bn(features)
         features = F.normalize(features)
         if labels is not None:
             return self.arcface(features, labels)

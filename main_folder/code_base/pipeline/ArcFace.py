@@ -33,6 +33,12 @@ class ArcMarginProduct(nn.Module):
         self.th = math.cos(math.pi - m)
         self.mm = math.sin(math.pi - m) * m
 
+    def __repr__(self):
+        return (
+            "{in_features}, {out_features}, s={s}, m = {m}, "
+            "easy_margin = {easy_margin}, ls_eps = {ls_eps} ".format(**self.__dict__)
+        )
+
     def forward(self, input, label):
         # --------------------------- cos(theta) & phi(theta) ---------------------------
         cosine = F.linear(F.normalize(input), F.normalize(self.weight))

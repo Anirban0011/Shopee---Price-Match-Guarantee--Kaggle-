@@ -23,9 +23,8 @@ class TextEncoder(nn.Module):
             features = self.backbone(
                 input_ids, attention_mask=attention_mask, output_hidden_states=True
             ).hidden_states[-2:]
-            features = torch.cat([features[-1], features[-2]], dim=-1)[
-                :, :, self.embed_size
-            ]
+            features = torch.cat([features[-1], features[-2]], dim=-1)
+            features = features[:, :, self.embed_size]
         else:
             features = self.backbone(
                 input_ids, attention_mask=attention_mask

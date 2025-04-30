@@ -53,5 +53,4 @@ class ImgEncoder(nn.Module):
         features = F.normalize(features)
         if labels is not None:
             features = self.arcface(features, labels)
-            features = nn.Softmax(features)
         return features

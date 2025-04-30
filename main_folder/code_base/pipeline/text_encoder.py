@@ -6,7 +6,7 @@ from code_base.pipeline.ArcFace import ArcMarginProduct
 
 
 class TextEncoder(nn.Module):
-    def __init__(self, num_classes, embed_size=1792, max_seq_length=35, backbone=None):
+    def __init__(self, num_classes, embed_size=1024, max_seq_length=35, backbone=None):
         super().__init__()
         self.backbone_name = backbone
         self.backbone = AutoModel.from_pretrained(backbone)
@@ -15,7 +15,7 @@ class TextEncoder(nn.Module):
         self.arcface = ArcMarginProduct(
             in_features=self.embed_size, out_features=self.out_features
         )
-        self.pool = nn.AvgPool2d(kernel_size=max_seq_length)
+        self.pool = nn.AvgPool1d(kernel_size=max_seq_length)
         self.bn = nn.BatchNorm1d(self.embed_size)
 
     def forward(self, input_ids, attention_mask, labels=None):
@@ -24,7 +24,7 @@ class TextEncoder(nn.Module):
                 input_ids, attention_mask=attention_mask, output_hidden_states=True
             ).hidden_states[-2:]
             features = torch.cat([features[-1], features[-2]], dim=-1)
-            features = features[:, :, self.embed_size]
+            features = features[:, :, :self.embed_size]
         else:
             features = self.backbone(
                 input_ids, attention_mask=attention_mask

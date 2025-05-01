@@ -2,15 +2,28 @@ import timm
 import torch.nn as nn
 import torch.nn.functional as F
 from timm.layers import ScaledStdConv2d, ScaledStdConv2dSame, BatchNormAct2d
-from code_base.pipeline.ArcFace import ArcMarginProduct
+from code_base.utils import ArcMarginProduct
 
 
 class ImgEncoder(nn.Module):
-    def __init__(self, num_classes, embed_size=1792, backbone=None, pretrained=True):
+    def __init__(
+        self,
+        num_classes,
+        embed_size=1792,
+        backbone=None,
+        pretrained=True,
+        arcmargin=0.5,
+        alpha=1e-4,
+        use_dynamic_margin=False,
+    ):
         super().__init__()
         self.backbone = timm.create_model(backbone, pretrained=pretrained)
         self.embed_size = embed_size  # embedding size
         self.out_features = num_classes  # num classes
+        self.margin = arcmargin
+        self.use_dynamic_margin = use_dynamic_margin
+        self.alpha = alpha
+
         if "nfnet_f0" in backbone:
             self.backbone._modules["final_conv"] = ScaledStdConv2dSame(
                 self.backbone._modules["final_conv"].in_channels,
@@ -40,17 +53,22 @@ class ImgEncoder(nn.Module):
                 drop_layer=type(self.backbone._modules["bn2"].drop),
                 act_layer=type(self.backbone._modules["bn2"].act),
             )
+
         self.arcface = ArcMarginProduct(
-            in_features=self.embed_size, out_features=self.out_features
+            in_features=self.embed_size,
+            out_features=self.out_features,
+            m=self.margin,
+            use_dynamic_margin=self.use_dynamic_margin,
+            alpha=self.alpha,
         )
         self.bn = nn.BatchNorm1d(self.embed_size)
 
-    def forward(self, x, labels=None):
+    def forward(self, x, labels=None, epoch=0):
         features = self.backbone.forward_features(x)
         features = F.adaptive_avg_pool2d(features, (1, 1))
         features = features.view(features.size(0), -1)
         features = self.bn(features)
         features = F.normalize(features)
         if labels is not None:
-            features = self.arcface(features, labels)
+            features = self.arcface(features, labels, epoch)
         return features

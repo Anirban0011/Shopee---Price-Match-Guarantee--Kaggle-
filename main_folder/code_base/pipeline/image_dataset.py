@@ -5,11 +5,12 @@ from torch.utils.data import Dataset
 
 
 class SHOPEEImageDataset(Dataset):
-    def __init__(self, df, dir, transform=None):
+    def __init__(self, df, dir, transform=None, gen_feat_only=False):
 
         self.df = df
         self.dir = dir
         self.transform = transform
+        self.only_feat = gen_feat_only
 
     def __len__(self):
         return len(self.df)
@@ -27,4 +28,6 @@ class SHOPEEImageDataset(Dataset):
         img = img.astype(np.float32)
         img = img.transpose(2, 0, 1) # pytorch ready NCHW
 
+        if self.only_feat:
+            return torch.tensor(img).float()
         return torch.tensor(img).float(), torch.tensor(row.label_group).float()

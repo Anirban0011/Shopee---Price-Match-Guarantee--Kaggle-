@@ -1,13 +1,15 @@
-import timm
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Neck1:
+    r"""Optional neck to used after backbone and before cosine head"""
+
     def __init__(self, in_features, channel_size, dropout=0.5):
         super().__init__()
         self.bn1 = nn.BatchNorm2d(self.in_features)
         self.dropout = nn.Dropout(dropout, inplace=True)
-        self.fc1 = nn.Linear(in_features * 16 * 16 , channel_size)
+        self.fc1 = nn.Linear(in_features * 16 * 16, channel_size)
         self.bn2 = nn.BatchNorm1d(self.channel_size)
 
     def forward(self, x):
@@ -17,4 +19,3 @@ class Neck1:
         x = self.fc1(x)
         x = self.bn2(x)
         return x
-

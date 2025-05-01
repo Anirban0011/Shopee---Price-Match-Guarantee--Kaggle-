@@ -4,9 +4,10 @@ from transformers import AutoTokenizer
 
 
 class SHOPEETextDataset(Dataset):
-    def __init__(self, df, tokenizer=None):
+    def __init__(self, df, tokenizer=None, gen_feat_only=False):
         self.df = df
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer)
+        self.only_feat = gen_feat_only
 
     def __len__(self):
         return len(self.df)
@@ -23,4 +24,6 @@ class SHOPEETextDataset(Dataset):
         )
         input_ids = text["input_ids"][0]
         attention_mask = text["attention_mask"][0]
+        if self.only_feat:
+            input_ids, attention_mask
         return input_ids, attention_mask, torch.tensor(row.label_group).float()

@@ -34,7 +34,7 @@ def train_img_model(epoch, dataloader, model, loss_fn, optimizer):
 
 def train_text_model(epoch, dataloader, model, loss_fn, optimizer):
     model.train()
-    bar = tqdm(dataloader)
+    bar = tqdm.tqdm(dataloader)
     losses = []
     scores=[]
     for batch_idx, (input_ids, attention_masks, targets) in enumerate(bar):

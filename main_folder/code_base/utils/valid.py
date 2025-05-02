@@ -11,7 +11,7 @@ def valid_img_model(dataloader,
                     quick_eval=False,
                     ):
     model.eval()
-    bar = tqdm(dataloader)
+    bar = tqdm.tqdm(dataloader)
     losses = []
     scores=[]
     with torch.no_grad():
@@ -23,6 +23,8 @@ def valid_img_model(dataloader,
                 images, targets
             )  # epoch=0 default, margin fixed during validation
             loss = loss_fn(logits, targets)
+            targets = targets.detach().cpu().numpy().reshape(1, -1)
+            logits = torch.argmax(logits, 1).detach().cpu().numpy().reshape(1, -1)
             score = row_wise_f1_score(targets, logits)
             print(
                 f"batch {batch_idx+1} loss : {loss.item():.4f} batch {batch_idx+1} score : {score}",
@@ -43,7 +45,7 @@ def valid_text_model(dataloader,
                      quick_eval=False,
                      ):
     model.eval()
-    bar = tqdm(dataloader)
+    bar = tqdm.tqdm(dataloader)
     losses = []
     scores=[]
     with torch.no_grad():
@@ -59,6 +61,8 @@ def valid_text_model(dataloader,
                 input_ids, attention_masks, targets
             )  # epoch=0 default, margin fixed during validation
             loss = loss_fn(logits, targets)
+            targets = targets.detach().cpu().numpy().reshape(1, -1)
+            logits = torch.argmax(logits, 1).detach().cpu().numpy().reshape(1, -1)
             score = row_wise_f1_score(targets, logits)
             print(
                 f"batch {batch_idx+1} loss : {loss.item():.4f} batch {batch_idx+1} score : {score}",

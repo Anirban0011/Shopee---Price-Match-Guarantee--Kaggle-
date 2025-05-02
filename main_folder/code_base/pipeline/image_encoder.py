@@ -24,7 +24,7 @@ class ImgEncoder(nn.Module):
         self.use_dynamic_margin = use_dynamic_margin
         self.alpha = alpha
 
-        if "nfnet" in backbone:
+        if "nfnet" in backbone: # adjust nfnet family
             self.backbone._modules["final_conv"] = nn.Conv2d(
                 self.backbone._modules["final_conv"].in_channels,
                 self.embed_size,

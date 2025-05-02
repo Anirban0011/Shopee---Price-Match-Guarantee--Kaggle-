@@ -25,7 +25,7 @@ class ImgEncoder(nn.Module):
         self.alpha = alpha
 
         if "nfnet_f" in backbone:
-            self.backbone._modules["final_conv"] = ScaledStdConv2d(
+            self.backbone._modules["final_conv"] = ScaledStdConv2dSame(
                 self.backbone._modules["final_conv"].in_channels,
                 self.embed_size,
                 kernel_size=(1, 1),

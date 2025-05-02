@@ -24,26 +24,20 @@ class ImgEncoder(nn.Module):
         self.use_dynamic_margin = use_dynamic_margin
         self.alpha = alpha
 
-        if "nfnet" in backbone: # adjust nfnet family
-            self.backbone._modules["final_conv"] = nn.Conv2d(
+        if "nfnet_f" in backbone:
+            self.backbone._modules["final_conv"] = ScaledStdConv2d(
                 self.backbone._modules["final_conv"].in_channels,
                 self.embed_size,
                 kernel_size=(1, 1),
                 stride=(1, 1),
             )
-        #     self.backbone._modules["final_conv"] = ScaledStdConv2dSame(
-        #         self.backbone._modules["final_conv"].in_channels,
-        #         self.embed_size,
-        #         kernel_size=(1, 1),
-        #         stride=(1, 1),
-        #     )
-        # elif "nfnet_l0" in backbone or "nfnet_l1" in backbone:
-        #     self.backbone._modules["final_conv"] = ScaledStdConv2d(
-        #         self.backbone._modules["final_conv"].in_channels,
-        #         self.embed_size,
-        #         kernel_size=(1, 1),
-        #         stride=(1, 1),
-        #     )
+        elif "nfnet_l0" in backbone or "nfnet_l1" in backbone:
+            self.backbone._modules["final_conv"] = ScaledStdConv2d(
+                self.backbone._modules["final_conv"].in_channels,
+                self.embed_size,
+                kernel_size=(1, 1),
+                stride=(1, 1),
+            )
         elif any(x in backbone for x in ["b5", "b6", "b7"]):
             self.backbone._modules["conv_head"] = nn.Conv2d(
                 self.backbone._modules["conv_head"].in_channels,

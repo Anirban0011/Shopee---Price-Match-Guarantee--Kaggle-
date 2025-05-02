@@ -31,7 +31,6 @@ class ImgEncoder(nn.Module):
                 self.embed_size,
                 kernel_size=(1, 1),
                 stride=(1, 1),
-                dtype=torch.float32,
             )
         elif "nfnet_l0" in backbone or "nfnet_l1" in backbone:
             self.backbone._modules["final_conv"] = ScaledStdConv2d(

@@ -26,7 +26,7 @@ class ImgEncoder(nn.Module):
 
         if "nfnet" in backbone:
             self.backbone._modules["final_conv"] = nn.Conv2d(
-                self.backbone._modules["conv_head"].in_channels,
+                self.backbone._modules["final_conv"].in_channels,
                 self.embed_size,
                 kernel_size=(1, 1),
                 stride=(1, 1),

@@ -15,8 +15,8 @@ def train_img_model(epoch, dataloader, model, loss_fn, optimizer):
         optimizer.zero_grad()
         logits = model(images, targets, epoch)  # epoch needed if use dynamic margin
         loss = loss_fn(logits, targets)
-        targets = targets.detach().cpu().numpy().reshape(1, -1)
-        logits = torch.argmax(logits, 1).detach().cpu().numpy().reshape(1, -1)
+        targets = targets.detach().cpu().numpy()
+        logits = torch.argmax(logits, 1).detach().cpu().numpy()
         score = f1_score(targets, logits, average='macro')
         loss.backward()
         optimizer.step()
@@ -47,14 +47,15 @@ def train_text_model(epoch, dataloader, model, loss_fn, optimizer):
             input_ids, attention_masks, targets, epoch
         )  # epoch needed if use dynamic margin
         loss = loss_fn(logits, targets)
-        targets = targets.detach().cpu().numpy().reshape(1, -1)
-        logits = torch.argmax(logits, 1).detach().cpu().numpy().reshape(1, -1)
+        targets = targets.detach().cpu().numpy()
+        logits = torch.argmax(logits, 1).detach().cpu().numpy()
         score = f1_score(targets, logits, average='macro')
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
         print(
-            f"batch {batch_idx+1} loss : {loss.item():.4f} batch {batch_idx+1} score : {score : .4f} \n",
+            f"batch {batch_idx+1} loss : {loss.item():.4f} \
+            batch {batch_idx+1} score : {score : .4f} \n",
             end="\r",
             flush=True,
         )

@@ -23,8 +23,8 @@ def valid_img_model(dataloader,
                 images, targets
             )  # epoch=0 default, margin fixed during validation
             loss = loss_fn(logits, targets)
-            targets = targets.detach().cpu().numpy().reshape(1, -1)
-            logits = torch.argmax(logits, 1).detach().cpu().numpy().reshape(1, -1)
+            targets = targets.detach().cpu().numpy()
+            logits = torch.argmax(logits, 1).detach().cpu().numpy()
             score = f1_score(targets, logits, average='macro')
             print(
                 f"batch {batch_idx+1} loss : {loss.item():.4f} batch {batch_idx+1} score : {score : .4f} \n",
@@ -61,11 +61,12 @@ def valid_text_model(dataloader,
                 input_ids, attention_masks, targets
             )  # epoch=0 default, margin fixed during validation
             loss = loss_fn(logits, targets)
-            targets = targets.detach().cpu().numpy().reshape(1, -1)
-            logits = torch.argmax(logits, 1).detach().cpu().numpy().reshape(1, -1)
+            targets = targets.detach().cpu().numpy()
+            logits = torch.argmax(logits, 1).detach().cpu().numpy()
             score = f1_score(targets, logits, average='macro')
             print(
-                f"batch {batch_idx+1} loss : {loss.item():.4f} batch {batch_idx+1} score : {score : .4f} \n",
+                f"batch {batch_idx+1} loss : {loss.item():.4f} \
+                batch {batch_idx+1} score : {score : .4f} \n",
                 end="\r",
                 flush=True,
             )

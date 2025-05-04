@@ -27,10 +27,12 @@ def valid_img_model(dataloader,
             logits = torch.argmax(logits, 1).detach().cpu().numpy()
             score = f1_score(targets, logits, average='macro')
             print(
-                f"batch {batch_idx+1} loss : {loss.item():.4f} batch {batch_idx+1} score : {score : .4f} \n",
+                f"batch {batch_idx+1} loss : {loss.item():.4f} \
+                batch {batch_idx+1} score : {score : .4f}",
                 end="\r",
                 flush=True,
             )
+            print("\n")
             losses.append(loss.item())
             scores.append(score)
         net_loss = np.mean(losses)
@@ -66,10 +68,11 @@ def valid_text_model(dataloader,
             score = f1_score(targets, logits, average='macro')
             print(
                 f"batch {batch_idx+1} loss : {loss.item():.4f} \
-                batch {batch_idx+1} score : {score : .4f} \n",
+                batch {batch_idx+1} score : {score : .4f}",
                 end="\r",
                 flush=True,
             )
+            print("\n")
             losses.append(loss.item())
             scores.append(score)
         net_loss = np.mean(losses)

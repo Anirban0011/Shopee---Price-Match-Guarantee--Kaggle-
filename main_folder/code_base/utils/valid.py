@@ -2,8 +2,8 @@ import torch
 import tqdm.notebook as tqdm
 import numpy as np
 from code_base.utils.cfg import CFG
-from code_base.utils.f1_score import row_wise_f1_score
-
+# from code_base.utils.f1_score import row_wise_f1_score
+from sklearn.metrics import f1_score
 
 def valid_img_model(dataloader,
                     model,
@@ -25,9 +25,9 @@ def valid_img_model(dataloader,
             loss = loss_fn(logits, targets)
             targets = targets.detach().cpu().numpy().reshape(1, -1)
             logits = torch.argmax(logits, 1).detach().cpu().numpy().reshape(1, -1)
-            score = row_wise_f1_score(targets, logits)
+            score = f1_score(targets, logits, average='macro')
             print(
-                f"batch {batch_idx+1} loss : {loss.item():.4f} batch {batch_idx+1} score : {score}",
+                f"batch {batch_idx+1} loss : {loss.item():.4f} batch {batch_idx+1} score : {score : .4f} \n",
                 end="\r",
                 flush=True,
             )
@@ -63,9 +63,9 @@ def valid_text_model(dataloader,
             loss = loss_fn(logits, targets)
             targets = targets.detach().cpu().numpy().reshape(1, -1)
             logits = torch.argmax(logits, 1).detach().cpu().numpy().reshape(1, -1)
-            score = row_wise_f1_score(targets, logits)
+            score = f1_score(targets, logits, average='macro')
             print(
-                f"batch {batch_idx+1} loss : {loss.item():.4f} batch {batch_idx+1} score : {score}",
+                f"batch {batch_idx+1} loss : {loss.item():.4f} batch {batch_idx+1} score : {score : .4f} \n",
                 end="\r",
                 flush=True,
             )

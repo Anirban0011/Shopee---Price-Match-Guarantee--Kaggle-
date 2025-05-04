@@ -3,25 +3,25 @@ import tqdm.notebook as tqdm
 import numpy as np
 from code_base.utils.cfg import CFG
 from code_base.utils.f1_score import row_wise_f1_score
-
+from sklearn.metrics import f1_score
 
 def train_img_model(epoch, dataloader, model, loss_fn, optimizer):
     model.train()
     bar = tqdm.tqdm(dataloader)
     losses = []
-    scores=[]
+    scores = []
     for batch_idx, (images, targets) in enumerate(bar):
         images, targets = images.to(CFG.device), targets.to(CFG.device).long()
+        optimizer.zero_grad()
         logits = model(images, targets, epoch)  # epoch needed if use dynamic margin
         loss = loss_fn(logits, targets)
         targets = targets.detach().cpu().numpy().reshape(1, -1)
         logits = torch.argmax(logits, 1).detach().cpu().numpy().reshape(1, -1)
-        score = row_wise_f1_score(targets, logits)
-        optimizer.zero_grad()
+        score = f1_score(targets, logits, average='macro')
         loss.backward()
         optimizer.step()
         print(
-            f"batch {batch_idx+1} loss : {loss.item():.4f} batch {batch_idx+1} score : {score}",
+            f"batch {batch_idx+1} loss : {loss.item():.4f} batch {batch_idx+1} score : {score :.4f} \n",
             end="\r",
             flush=True,
         )
@@ -36,7 +36,7 @@ def train_text_model(epoch, dataloader, model, loss_fn, optimizer):
     model.train()
     bar = tqdm.tqdm(dataloader)
     losses = []
-    scores=[]
+    scores = []
     for batch_idx, (input_ids, attention_masks, targets) in enumerate(bar):
         input_ids, attention_masks, targets = (
             input_ids.to(CFG.device),
@@ -49,12 +49,12 @@ def train_text_model(epoch, dataloader, model, loss_fn, optimizer):
         loss = loss_fn(logits, targets)
         targets = targets.detach().cpu().numpy().reshape(1, -1)
         logits = torch.argmax(logits, 1).detach().cpu().numpy().reshape(1, -1)
-        score = row_wise_f1_score(targets, logits)
+        score = f1_score(targets, logits, average='macro')
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
         print(
-            f"batch {batch_idx+1} loss : {loss.item():.4f} batch {batch_idx+1} score : {score}",
+            f"batch {batch_idx+1} loss : {loss.item():.4f} batch {batch_idx+1} score : {score : .4f} \n",
             end="\r",
             flush=True,
         )

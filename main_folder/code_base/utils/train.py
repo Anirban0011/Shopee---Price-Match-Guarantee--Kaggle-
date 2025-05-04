@@ -21,14 +21,13 @@ def train_img_model(epoch, dataloader, model, loss_fn, optimizer):
         loss.backward()
         optimizer.step()
         print(
-            f"batch {batch_idx+1} loss : {loss.item():.4f} \
-            batch {batch_idx+1} score : {score :.4f}",
+            f"loss : {loss.item():.4f} score : {score :.4f}",
             end="\r",
             flush=True,
         )
-        print("\n")
         losses.append(loss.item())
         scores.append(score)
+    print("\n")
     net_loss = np.mean(losses)
     net_score = np.mean(scores)
     return net_loss, net_score
@@ -56,14 +55,13 @@ def train_text_model(epoch, dataloader, model, loss_fn, optimizer):
         loss.backward()
         optimizer.step()
         print(
-            f"batch {batch_idx+1} loss : {loss.item():.4f} \
-            batch {batch_idx+1} score : {score : .4f}",
+            f"loss : {loss.item():.4f} score : {score : .4f}",
             end="\r",
             flush=True,
         )
-        print("\n")
         losses.append(loss.item())
         scores.append(score)
+    print("\n")
     net_loss = np.mean(losses)
     net_score = np.mean(scores)
     return net_loss, net_score

@@ -24,7 +24,7 @@ class ArcMarginProduct(nn.Module):
         easy_margin=False,
         ls_eps=0.0,
         alpha=1e-4,
-        use_dynamic_margin=True,
+        use_dynamic_margin=False,
     ):
         super(ArcMarginProduct, self).__init__()
         self.in_features = in_features

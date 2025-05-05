@@ -24,44 +24,44 @@ class ImgEncoder(nn.Module):
         self.use_dynamic_margin = use_dynamic_margin
         self.alpha = alpha
 
-        if "nfnet_f" in backbone:
-            self.backbone._modules["final_conv"] = ScaledStdConv2dSame(
-                self.backbone._modules["final_conv"].in_channels,
-                self.embed_size,
-                kernel_size=(1, 1),
-                stride=(1, 1),
-            )
-        elif "nfnet_l0" in backbone or "nfnet_l1" in backbone:
-            self.backbone._modules["final_conv"] = ScaledStdConv2d(
-                self.backbone._modules["final_conv"].in_channels,
-                self.embed_size,
-                kernel_size=(1, 1),
-                stride=(1, 1),
-            )
-        elif any(x in backbone for x in ["b5", "b6", "b7"]):
-            self.backbone._modules["conv_head"] = nn.Conv2d(
-                self.backbone._modules["conv_head"].in_channels,
-                self.embed_size,
-                kernel_size=(1, 1),
-                stride=(1, 1),
-            )
-            self.backbone._modules["bn2"] = BatchNormAct2d(
-                self.embed_size,
-                eps=self.backbone._modules["bn2"].eps,
-                affine=self.backbone._modules["bn2"].affine,
-                track_running_stats=self.backbone._modules["bn2"].track_running_stats,
-                drop_layer=type(self.backbone._modules["bn2"].drop),
-                act_layer=type(self.backbone._modules["bn2"].act),
-            )
+        # if "nfnet_f" in backbone:
+        #     self.backbone._modules["final_conv"] = ScaledStdConv2dSame(
+        #         self.backbone._modules["final_conv"].in_channels,
+        #         self.embed_size,
+        #         kernel_size=(1, 1),
+        #         stride=(1, 1),
+        #     )
+        # elif "nfnet_l0" in backbone or "nfnet_l1" in backbone:
+        #     self.backbone._modules["final_conv"] = ScaledStdConv2d(
+        #         self.backbone._modules["final_conv"].in_channels,
+        #         self.embed_size,
+        #         kernel_size=(1, 1),
+        #         stride=(1, 1),
+        #     )
+        # elif any(x in backbone for x in ["b5", "b6", "b7"]):
+        #     self.backbone._modules["conv_head"] = nn.Conv2d(
+        #         self.backbone._modules["conv_head"].in_channels,
+        #         self.embed_size,
+        #         kernel_size=(1, 1),
+        #         stride=(1, 1),
+        #     )
+        #     self.backbone._modules["bn2"] = BatchNormAct2d(
+        #         self.embed_size,
+        #         eps=self.backbone._modules["bn2"].eps,
+        #         affine=self.backbone._modules["bn2"].affine,
+        #         track_running_stats=self.backbone._modules["bn2"].track_running_stats,
+        #         drop_layer=type(self.backbone._modules["bn2"].drop),
+        #         act_layer=type(self.backbone._modules["bn2"].act),
+        #     )
 
         self.arcface = ArcMarginProduct(
-            in_features=self.embed_size,
+            in_features=self.backbone.num_features,
             out_features=self.out_features,
             m=self.margin,
             use_dynamic_margin=self.use_dynamic_margin,
             alpha=self.alpha,
         )
-        self.bn = nn.BatchNorm1d(self.embed_size)
+        self.bn = nn.BatchNorm1d(self.backbone.num_features)
 
     def forward(self, x, labels=None, epoch=0):
         features = self.backbone.forward_features(x)

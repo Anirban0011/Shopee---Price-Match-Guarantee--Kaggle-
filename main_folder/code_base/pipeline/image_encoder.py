@@ -2,8 +2,7 @@ import timm
 import torch.nn as nn
 import torch.nn.functional as F
 from timm.layers import ScaledStdConv2d, ScaledStdConv2dSame, BatchNormAct2d
-from code_base.utils import ArcMarginProduct
-
+from code_base.utils import ArcMarginProduct, ArcModule
 
 class ImgEncoder(nn.Module):
     def __init__(
@@ -50,7 +49,13 @@ class ImgEncoder(nn.Module):
         #         act_layer=type(self.backbone._modules["bn2"].act),
         #     )
 
-        self.arcface = ArcMarginProduct(
+        # self.arcface = ArcMarginProduct(
+        #     in_features=self.backbone.num_features,
+        #     out_features=self.out_features,
+        #     m=self.margin,
+        # )
+
+        self.arcface = ArcModule(
             in_features=self.backbone.num_features,
             out_features=self.out_features,
             m=self.margin,

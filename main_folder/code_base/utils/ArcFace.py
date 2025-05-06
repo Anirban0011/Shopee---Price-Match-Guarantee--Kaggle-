@@ -23,16 +23,12 @@ class ArcMarginProduct(nn.Module):
         m=0.50,
         easy_margin=False,
         ls_eps=0.0,
-        alpha=1e-4,
-        use_dynamic_margin=False,
     ):
         super(ArcMarginProduct, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
         self.s = s
         self.m = m
-        self.alpha = alpha
-        self.use_dynamic_margin = use_dynamic_margin
         self.ls_eps = ls_eps  # label smoothing
         self.weight = Parameter(torch.FloatTensor(out_features, in_features))
         nn.init.xavier_uniform_(self.weight)
@@ -49,22 +45,8 @@ class ArcMarginProduct(nn.Module):
             "easy_margin = {easy_margin}, ls_eps = {ls_eps} ".format(**self.__dict__)
         )
 
-    def dynamic_margin(
-        self,
-        epoch,
-    ):
-        m = self.m + (self.alpha * epoch)
-        self.cos_m = math.cos(m)
-        self.sin_m = math.sin(m)
-        self.th = math.cos(math.pi - m)
-        self.mm = math.sin(math.pi - m) * m
-        print(f"margin set to : {m}\n")
-        return None
-
-    def forward(self, input, label, epoch):
+    def forward(self, input, label):
         # --------------------------- cos(theta) & phi(theta) ---------------------------
-        if self.use_dynamic_margin:
-            self.dynamic_margin(epoch)
         cosine = F.linear(F.normalize(input), F.normalize(self.weight))
         sine = torch.sqrt(1.0 - torch.pow(cosine, 2))
         phi = cosine * self.cos_m - sine * self.sin_m

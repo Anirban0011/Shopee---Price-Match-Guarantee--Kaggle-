@@ -55,19 +55,19 @@ class ImgEncoder(nn.Module):
         #     m=self.margin,
         # )
 
-        self.arcface = ArcModule(
-            in_features=self.backbone.num_features,
-            out_features=self.out_features,
-            m=self.margin,
-        )
+        # self.arcface = ArcModule(
+        #     in_features=self.backbone.num_features,
+        #     out_features=self.out_features,
+        #     m=self.margin,
+        # )
         self.bn = nn.BatchNorm1d(self.backbone.num_features)
 
-    def forward(self, x, labels=None):
+    def forward(self, x):
         features = self.backbone.forward_features(x)
         features = F.adaptive_avg_pool2d(features, (1, 1))
         features = features.view(features.size(0), -1)
         features = self.bn(features)
         features = F.normalize(features)
-        if labels is not None:
-            features = self.arcface(features, labels)
+        # if labels is not None:
+        #     features = self.arcface(features, labels)
         return features

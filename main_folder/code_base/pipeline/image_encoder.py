@@ -60,11 +60,12 @@ class ImgEncoder(nn.Module):
         #     out_features=self.out_features,
         #     m=self.margin,
         # )
+        self.gap = nn.AdaptiveAvgPool2d((1, 1))
         self.bn = nn.BatchNorm1d(self.backbone.num_features)
 
     def forward(self, x):
         features = self.backbone.forward_features(x)
-        features = F.adaptive_avg_pool2d(features, (1, 1))
+        features = self.gap(features)
         features = features.view(features.size(0), -1)
         features = self.bn(features)
         features = F.normalize(features)

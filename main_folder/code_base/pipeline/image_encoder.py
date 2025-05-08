@@ -49,26 +49,20 @@ class ImgEncoder(nn.Module):
         #         act_layer=type(self.backbone._modules["bn2"].act),
         #     )
 
-        # self.arcface = ArcMarginProduct(
-        #     in_features=self.backbone.num_features,
-        #     out_features=self.out_features,
-        #     m=self.margin,
-        # )
-
-        # self.arcface = ArcModule(
-        #     in_features=self.backbone.num_features,
-        #     out_features=self.out_features,
-        #     m=self.margin,
-        # )
+        self.arcface = ArcMarginProduct(
+            in_features=self.backbone.num_features,
+            out_features=self.out_features,
+            m=self.margin,
+        )
         self.gap = nn.AdaptiveAvgPool2d((1, 1))
         self.bn = nn.BatchNorm1d(self.backbone.num_features)
 
-    def forward(self, x):
+    def forward(self, x, labels=None):
         features = self.backbone.forward_features(x)
         features = self.gap(features)
         features = features.view(features.size(0), -1)
         features = self.bn(features)
         features = F.normalize(features)
-        # if labels is not None:
-        #     features = self.arcface(features, labels)
+        if labels is not None:
+            features = self.arcface(features, labels)
         return features

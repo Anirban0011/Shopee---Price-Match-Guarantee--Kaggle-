@@ -11,6 +11,7 @@ class ImgEncoder(nn.Module):
         embed_size=1792,
         backbone=None,
         pretrained=True,
+        arcscale=30.0,
         arcmargin=0.5,
     ):
         super().__init__()
@@ -18,12 +19,14 @@ class ImgEncoder(nn.Module):
         self.embed_size = embed_size  # embedding size
         self.num_classes = num_classes  # num classes
         self.margin = arcmargin
+        self.scale = arcscale
 
         self.fc = nn.Linear(self.backbone.num_features, self.embed_size)
 
         self.arcface = ArcMarginProduct(
             in_features=self.embed_size,
             out_features=self.num_classes,
+            s=self.scale,
             m=self.margin,
         )
         self.gap = nn.AdaptiveAvgPool2d((1, 1))

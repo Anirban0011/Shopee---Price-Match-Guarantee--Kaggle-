@@ -2,7 +2,7 @@ import timm
 import torch.nn as nn
 import torch.nn.functional as F
 from timm.layers import ScaledStdConv2d, ScaledStdConv2dSame, BatchNormAct2d
-from code_base.utils import ArcMarginProduct, ArcModule
+from code_base.utils import ArcMarginProduct
 
 class ImgEncoder(nn.Module):
     def __init__(

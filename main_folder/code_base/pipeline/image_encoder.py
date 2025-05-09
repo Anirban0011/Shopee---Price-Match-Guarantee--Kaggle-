@@ -16,21 +16,24 @@ class ImgEncoder(nn.Module):
         super().__init__()
         self.backbone = timm.create_model(backbone, pretrained=pretrained)
         self.embed_size = embed_size  # embedding size
-        self.out_features = num_classes  # num classes
+        self.num_classes = num_classes  # num classes
         self.margin = arcmargin
 
+        self.fc = nn.Linear(self.backbone.num_features, self.embed_size)
+
         self.arcface = ArcMarginProduct(
-            in_features=self.backbone.num_features,
-            out_features=self.out_features,
+            in_features=self.embed_size,
+            out_features=self.num_classes,
             m=self.margin,
         )
         self.gap = nn.AdaptiveAvgPool2d((1, 1))
-        self.bn = nn.BatchNorm1d(self.backbone.num_features)
+        self.bn = nn.BatchNorm1d(self.embed_size)
 
     def forward(self, x, labels=None):
         features = self.backbone.forward_features(x)
         features = self.gap(features)
         features = features.view(features.size(0), -1)
+        features = self.fc(features)
         features = self.bn(features)
         features = F.normalize(features)
         if labels is not None:

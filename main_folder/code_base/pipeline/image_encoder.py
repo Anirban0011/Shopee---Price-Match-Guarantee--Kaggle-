@@ -22,7 +22,8 @@ class ImgEncoder(nn.Module):
         self.margin = margin
         self.scale = scale
 
-        self.fc = nn.Linear(self.backbone.num_features, self.embed_size)
+        self.fc1 = nn.Linear(self.backbone.num_features, self.embed_size)
+        self.fc2 = nn.Linear(self.embed_size, self.num_classes)
 
         self.final = CurricularFace(
             in_features=self.embed_size,
@@ -33,16 +34,17 @@ class ImgEncoder(nn.Module):
         self.gem = GeM()
         self.gap = nn.AdaptiveAvgPool2d((1, 1))
         self.bn = nn.BatchNorm1d(self.embed_size)
-        self.prelu = nn.PReLU()
+        self.softmax = nn.Softmax()
 
     def forward(self, x, labels=None):
         features = self.backbone.forward_features(x)
         features = self.gap(features)
         features = features.view(features.size(0), -1)
-        features = self.fc(features)
+        features = self.fc1(features)
         features = self.bn(features)
-        features = F.normalize(features)
-        features = self.prelu(features)
+        features = self.fc2(features)
+        # features = F.normalize(features)
+        features = self.softmax(features)
         if labels is not None:
             features = self.final(features, labels)
         return features

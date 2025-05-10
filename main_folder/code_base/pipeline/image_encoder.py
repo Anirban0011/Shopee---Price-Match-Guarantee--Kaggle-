@@ -34,7 +34,7 @@ class ImgEncoder(nn.Module):
         self.gem = GeM()
         self.gap = nn.AdaptiveAvgPool2d((1, 1))
         self.bn = nn.BatchNorm1d(self.embed_size)
-        self.softmax = nn.Softmax(dim =-1)
+        self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x, labels=None):
         features = self.backbone.forward_features(x)

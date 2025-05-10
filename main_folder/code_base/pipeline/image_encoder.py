@@ -38,13 +38,13 @@ class ImgEncoder(nn.Module):
 
     def forward(self, x, labels=None):
         features = self.backbone.forward_features(x)
-        features = self.gap(features)
+        features = self.gem(features)
         features = features.view(features.size(0), -1)
         features = self.fc1(features)
         features = self.bn(features)
-        features = self.fc2(features)
-        # features = F.normalize(features)
-        features = self.softmax(features)
+        # features = self.fc2(features)
+        features = F.normalize(features)
+        # features = self.softmax(features)
         if labels is not None:
             features = self.final(features, labels)
         return features

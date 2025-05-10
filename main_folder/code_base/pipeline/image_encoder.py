@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from timm.layers import ScaledStdConv2d, ScaledStdConv2dSame, BatchNormAct2d
 from code_base.utils import ArcMarginProduct, CurricularFace
-from code_base.pipeline import GeM
+from .gempool import GeM
 
 class ImgEncoder(nn.Module):
     def __init__(

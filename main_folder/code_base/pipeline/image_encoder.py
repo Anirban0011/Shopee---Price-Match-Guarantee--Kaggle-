@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from timm.layers import ScaledStdConv2d, ScaledStdConv2dSame, BatchNormAct2d
 from code_base.utils import ArcMarginProduct, CurricularFace
-
+from code_base.pipeline import GeM
 
 class ImgEncoder(nn.Module):
     def __init__(
@@ -30,8 +30,10 @@ class ImgEncoder(nn.Module):
             s=self.scale,
             m=self.margin,
         )
+        self.gem = GeM()
         self.gap = nn.AdaptiveAvgPool2d((1, 1))
         self.bn = nn.BatchNorm1d(self.embed_size)
+        self.prelu = nn.PReLU()
 
     def forward(self, x, labels=None):
         features = self.backbone.forward_features(x)
@@ -40,6 +42,7 @@ class ImgEncoder(nn.Module):
         features = self.fc(features)
         features = self.bn(features)
         features = F.normalize(features)
+        features = self.prelu(features)
         if labels is not None:
             features = self.final(features, labels)
         return features

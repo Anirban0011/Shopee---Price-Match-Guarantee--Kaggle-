@@ -34,7 +34,7 @@ class ImgEncoder(nn.Module):
         self.gap = nn.AdaptiveAvgPool2d((1, 1))
         self.layernorm = nn.LayerNorm(self.backbone.num_features)
         self.bn = nn.BatchNorm1d(self.embed_size)
-        self.softmax = nn.Softmax(dim=1)
+        self.prelu = nn.PReLU()
 
     def forward(self, x, labels=None):
         features = self.backbone.forward_features(x)
@@ -43,6 +43,7 @@ class ImgEncoder(nn.Module):
         features = self.layernorm(features)
         features = self.fc1(features)
         features = self.bn(features)
+        features = self.prelu(features)
         # features = F.normalize(features)
         if labels is not None:
             features = self.final(features, labels)

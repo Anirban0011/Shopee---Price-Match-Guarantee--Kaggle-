@@ -43,7 +43,7 @@ class ImgEncoder(nn.Module):
         features = self.layernorm(features)
         features = self.fc1(features)
         features = self.bn(features)
-        features = self.prelu(features)
+        # features = self.prelu(features)
         # features = F.normalize(features)
         if labels is not None:
             features = self.final(features, labels)

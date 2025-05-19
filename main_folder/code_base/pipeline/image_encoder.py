@@ -22,6 +22,11 @@ class ImgEncoder(nn.Module):
         self.margin = margin
         self.scale = scale
 
+        self.final_conv = nn.Conv2d(self.backbone.num_features,
+                                    self.embed_size,
+                                    kernel_size=1,
+                                    )
+
         self.fc1 = nn.Linear(self.backbone.num_features, self.embed_size)
 
         self.final = CurricularFace(
@@ -38,13 +43,14 @@ class ImgEncoder(nn.Module):
 
     def forward(self, x, labels=None):
         features = self.backbone.forward_features(x)
+        features = self.final_conv(features)
         features = self.gem(features)
         features = features.view(features.size(0), -1)
-        features = self.layernorm(features)
-        features = self.fc1(features)
+        # features = self.layernorm(features)
+        # features = self.fc1(features)
         features = self.bn(features)
         # features = self.prelu(features)
-        # features = F.normalize(features)
+        features = F.normalize(features)
         if labels is not None:
             features = self.final(features, labels)
         return features

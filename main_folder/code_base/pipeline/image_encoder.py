@@ -41,7 +41,7 @@ class ImgEncoder(nn.Module):
         self.bn = nn.BatchNorm1d(self.embed_size)
         self.prelu = nn.PReLU()
 
-    def forward(self, x):
+    def forward(self, x, labels=None):
         features = self.backbone.forward_features(x)
         features = self.final_conv(features)
         features = self.gem(features)
@@ -51,6 +51,7 @@ class ImgEncoder(nn.Module):
         features = self.bn(features)
         # features = self.prelu(features)
         features = F.normalize(features)
-        # if labels is not None:
-        #     features = self.final(features, labels)
-        return features
+        if labels is not None:
+            # return feat with and without margin
+            features, _ = self.final(features, labels)
+        return features, _

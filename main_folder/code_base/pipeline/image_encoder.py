@@ -37,7 +37,7 @@ class ImgEncoder(nn.Module):
         )
         self.gem = GeM()
         self.gap = nn.AdaptiveAvgPool2d((1, 1))
-        self.layernorm = nn.LayerNorm(self.backbone.num_features)
+        self.layernorm = nn.LayerNorm(self.embed_size)
         self.bn = nn.BatchNorm1d(self.embed_size)
         self.prelu = nn.PReLU()
 

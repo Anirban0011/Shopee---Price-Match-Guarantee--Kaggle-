@@ -50,7 +50,7 @@ class ImgEncoder(nn.Module):
         # features = self.fc1(features)
         features = self.bn(features)
         # features = self.prelu(features)
-        features = F.normalize(features)
+        # features = F.normalize(features)
         if labels is not None:
             # return feat with and without margin
             features, _ = self.final(features, labels)

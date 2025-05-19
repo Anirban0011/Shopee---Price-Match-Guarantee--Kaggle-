@@ -27,9 +27,9 @@ class CurricularFace(nn.Module):
         nn.init.normal_(self.kernel, std=0.01)
 
     def forward(self, embbedings, label):
-        # embbedings = l2_norm(embbedings, axis=1)
-        # kernel_norm = l2_norm(self.kernel, axis=0)
-        kernel_norm = self.kernel
+        embbedings = l2_norm(embbedings, axis=1)
+        kernel_norm = l2_norm(self.kernel, axis=0)
+        # kernel_norm = self.kernel
         cos_theta = torch.mm(embbedings, kernel_norm)
         cos_theta = cos_theta.clamp(-1, 1)  # for numerical stability
         with torch.no_grad():

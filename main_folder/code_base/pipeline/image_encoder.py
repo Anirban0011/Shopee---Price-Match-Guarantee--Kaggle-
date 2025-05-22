@@ -5,6 +5,7 @@ from timm.layers import ScaledStdConv2d, ScaledStdConv2dSame, BatchNormAct2d
 from code_base.utils import ArcMarginProduct, CurricularFace
 from .gempool import GeM
 
+
 class ImgEncoder(nn.Module):
     def __init__(
         self,
@@ -14,6 +15,7 @@ class ImgEncoder(nn.Module):
         pretrained=True,
         scale=30.0,
         margin=0.5,
+        final_layer="arcface",
     ):
         super().__init__()
         self.backbone = timm.create_model(backbone, pretrained=pretrained)
@@ -22,24 +24,34 @@ class ImgEncoder(nn.Module):
         self.margin = margin
         self.scale = scale
 
-        self.final_conv = nn.Conv2d(self.backbone.num_features,
-                                    self.embed_size,
-                                    kernel_size=1,
-                                    )
+        self.final_conv = nn.Conv2d(
+            self.backbone.num_features,
+            self.embed_size,
+            kernel_size=1,
+        )
 
         self.fc1 = nn.Linear(self.backbone.num_features, self.embed_size)
 
-        self.final = CurricularFace(
-            in_features=self.embed_size,
-            out_features=self.num_classes,
-            s=self.scale,
-            m=self.margin,
-        )
+        if final_layer == "arcface":
+            self.final = ArcMarginProduct(
+                in_features=self.embed_size,
+                out_features=self.num_classes,
+                s=self.scale,
+                m=self.margin,
+            )
+
+        if final_layer == "currface":
+            self.final = CurricularFace(
+                in_features=self.embed_size,
+                out_features=self.num_classes,
+                s=self.scale,
+                m=self.margin,
+            )
+
         self.gem = GeM()
         self.gap = nn.AdaptiveAvgPool2d((1, 1))
         self.layernorm = nn.LayerNorm(self.embed_size)
         self.bn = nn.BatchNorm1d(self.embed_size)
-        self.prelu = nn.PReLU()
 
     def forward(self, x, labels=None):
         features = self.backbone.forward_features(x)
@@ -47,10 +59,7 @@ class ImgEncoder(nn.Module):
         features = self.gem(features)
         features = features.view(features.size(0), -1)
         # features = self.layernorm(features)
-        # features = self.fc1(features)
         features = self.bn(features)
-        # features = self.prelu(features)
-        # features = F.normalize(features)
         if labels is not None:
             # return feat with and without margin
             features, _ = self.final(features, labels)

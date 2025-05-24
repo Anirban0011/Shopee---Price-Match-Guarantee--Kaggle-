@@ -1,7 +1,7 @@
 from torch.optim.lr_scheduler import LRScheduler
 
 
-class warmup_schedule(LRScheduler):
+class WarmupScheduler(LRScheduler):
     def __init__(self, optimizer, warmup_epochs, plateau_lr, last_epoch=-1):
         self.warmup_epochs = warmup_epochs
         self.plateau_lr = plateau_lr

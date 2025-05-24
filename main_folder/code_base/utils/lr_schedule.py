@@ -12,7 +12,7 @@ class WarmupScheduler(LRScheduler):
     ):
         self.warmup_epochs = warmup_epochs
         self.plateau_lr = plateau_lr
-        super.__init__(optimizer, last_epoch, verbose)
+        super().__init__(optimizer, last_epoch, verbose)
 
     def get_lr(self):
         # train all modules with same lr

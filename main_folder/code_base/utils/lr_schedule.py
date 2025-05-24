@@ -18,11 +18,8 @@ class WarmupScheduler(LRScheduler):
         # train all modules with same lr
         if self.last_epoch < self.warmup_epochs:
             return [
-                base_lr
-                + (self.plateau_lr - base_lr)
-                * (self.last_epoch + 1)
-                / self.warmup_epochs
-                for base_lr in self.base_lrs
+                (self.plateau_lr) * (self.last_epoch + 1) / self.warmup_epochs
+                for _ in self.base_lrs
             ]
         else:
             return [self.plateau_lr for _ in self.base_lrs]

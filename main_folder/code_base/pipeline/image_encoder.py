@@ -13,6 +13,7 @@ class ImgEncoder(nn.Module):
         embed_size=1792,
         backbone=None,
         pretrained=True,
+        dropout=0.5,
         scale=30.0,
         margin=0.5,
         final_layer="arcface",
@@ -52,14 +53,15 @@ class ImgEncoder(nn.Module):
         self.gap = nn.AdaptiveAvgPool2d((1, 1))
         self.layernorm = nn.LayerNorm(self.embed_size)
         self.bn = nn.BatchNorm1d(self.embed_size)
+        self.dropout = nn.Dropout1d(p=dropout, inplace=True)
 
     def forward(self, x, labels=None):
         features = self.backbone.forward_features(x)
         features = self.final_conv(features)
         features = self.gem(features)
         features = features.view(features.size(0), -1)
-        # features = self.layernorm(features)
         features = self.bn(features)
+        features = self.dropout(features)
         if labels is not None:
             # return feat with and without margin
             features, _ = self.final(features, labels)

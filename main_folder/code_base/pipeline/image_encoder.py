@@ -51,18 +51,19 @@ class ImgEncoder(nn.Module):
 
         self.gem = GeM()
         self.gap = nn.AdaptiveAvgPool2d((1, 1))
-        self.layernorm = nn.LayerNorm(self.embed_size)
-        self.bn = nn.BatchNorm1d(self.embed_size)
-        self.dropout = nn.Dropout1d(p=dropout, inplace=True)
+        self.bn1 = nn.BatchNorm2d(self.backbone.num_features)
+        self.dropout = nn.Dropout2d(p=dropout, inplace=True)
+        self.bn2 = nn.BatchNorm1d(self.embed_size)
 
     def forward(self, x, labels=None):
         features = self.backbone.forward_features(x)
+        features = self.bn1(features)
+        features = self.dropout(features)
         features = self.final_conv(features)
         features = self.gem(features)
         features = features.view(features.size(0), -1)
-        features = self.bn(features)
-        features = self.dropout(features)
+        features = self.bn2(features)
+        features = F.normalize(features)
         if labels is not None:
-            # return feat with and without margin
-            features, _ = self.final(features, labels)
-        return features, _
+            return self.final(features, labels)
+        return features

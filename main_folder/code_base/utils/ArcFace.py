@@ -47,9 +47,8 @@ class ArcMarginProduct(nn.Module):
 
     def forward(self, input, label):
         # --------------------------- cos(theta) & phi(theta) ---------------------------
-        cosine = F.linear(F.normalize(input), F.normalize(self.weight))
-        with torch.no_grad():
-            origin_cos = cosine.clone()
+        cosine = F.linear(input, F.normalize(self.weight))
+        cosine = cosine.clamp(-1, 1)
         sine = torch.sqrt(1.0 - torch.pow(cosine, 2))
         phi = cosine * self.cos_m - sine * self.sin_m
         if self.easy_margin:
@@ -66,4 +65,4 @@ class ArcMarginProduct(nn.Module):
         output = (one_hot * phi) + ((1.0 - one_hot) * cosine)
         output *= self.s
 
-        return output, origin_cos * self.s
+        return output

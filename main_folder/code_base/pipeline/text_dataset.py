@@ -25,5 +25,5 @@ class SHOPEETextDataset(Dataset):
         input_ids = text["input_ids"][0]
         attention_mask = text["attention_mask"][0]
         if self.only_feat:
-            input_ids, attention_mask
+            return input_ids, attention_mask
         return input_ids, attention_mask, torch.tensor(row.label_group).float()

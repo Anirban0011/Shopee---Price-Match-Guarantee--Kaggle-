@@ -2,7 +2,7 @@ import math
 import torch
 import torch.nn as nn
 from torch.nn import Parameter
-
+import torch.nn.functional as F
 
 def l2_norm(input, axis=1):
     norm = torch.norm(input, 2, axis, True)
@@ -27,13 +27,13 @@ class CurricularFace(nn.Module):
         nn.init.normal_(self.kernel, std=0.01)
 
     def forward(self, embbedings, label):
-        embbedings = l2_norm(embbedings, axis=1)
-        kernel_norm = l2_norm(self.kernel, axis=0)
+        # embbedings = l2_norm(embbedings, axis=1)
+        # kernel_norm = l2_norm(self.kernel, axis=0)
         # kernel_norm = self.kernel
-        cos_theta = torch.mm(embbedings, kernel_norm)
+        cos_theta = F.linear(embbedings, F.normalize(self.kernel))
         cos_theta = cos_theta.clamp(-1, 1)  # for numerical stability
-        with torch.no_grad():
-            origin_cos = cos_theta.clone()
+        # with torch.no_grad():
+        #     origin_cos = cos_theta.clone()
         target_logit = cos_theta[torch.arange(0, embbedings.size(0)), label].view(-1, 1)
 
         sin_theta = torch.sqrt(1.0 - torch.pow(target_logit, 2))
@@ -51,4 +51,5 @@ class CurricularFace(nn.Module):
         cos_theta[mask] = hard_example * (self.t + hard_example)
         cos_theta.scatter_(1, label.view(-1, 1).long(), final_target_logit)
         output = cos_theta * self.s
-        return output, origin_cos * self.s
+        return output
+    # , origin_cos * self.s

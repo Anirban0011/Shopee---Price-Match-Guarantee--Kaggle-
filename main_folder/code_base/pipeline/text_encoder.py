@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from transformers import AutoModel
+from transformers import AutoModel, AutoConfig
 from code_base.utils import ArcMarginProduct, CurricularFace
 
 
@@ -19,7 +19,8 @@ class TextEncoder(nn.Module):
     ):
         super().__init__()
         self.backbone_name = backbone
-        self.backbone = AutoModel.from_pretrained(backbone)
+        self.config = AutoConfig.from_pretrained(backbone)
+        self.backbone = AutoModel.from_config(self.config)
         self.out_features = num_classes
         self.embed_size = embed_size
         self.scale = scale

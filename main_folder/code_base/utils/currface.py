@@ -20,7 +20,6 @@ class CurricularFace(nn.Module):
         m=0.5,
         s=64.0,
         alpha=0.0,
-        dynamic_margin=False,
     ):
         super(CurricularFace, self).__init__()
         self.in_features = in_features
@@ -28,7 +27,6 @@ class CurricularFace(nn.Module):
         self.m = m
         self.s = s
         self.alpha = alpha
-        self.dm = dynamic_margin
         self.cos_m = math.cos(m)
         self.sin_m = math.sin(m)
         self.threshold = math.cos(math.pi - m)
@@ -38,7 +36,7 @@ class CurricularFace(nn.Module):
         nn.init.normal_(self.kernel, std=0.01)
 
     def update_margin(self, epoch):
-        self.m = self.m + (self.alpha*epoch)
+        self.m = self.m + (self.alpha*epoch+1)
         self.cos_m = math.cos(self.m)
         self.sin_m = math.sin(self.m)
         self.threshold = math.cos(math.pi - self.m)
@@ -52,12 +50,7 @@ class CurricularFace(nn.Module):
         # with torch.no_grad():
         #     origin_cos = cos_theta.clone()
         target_logit = cos_theta[torch.arange(0, embbedings.size(0)), label].view(-1, 1)
-
         sin_theta = torch.sqrt(1.0 - torch.pow(target_logit, 2))
-
-        if self.dm:
-            self.update_margin(epoch)
-
         cos_theta_m = (
             target_logit * self.cos_m - sin_theta * self.sin_m
         )  # cos(target+margin)

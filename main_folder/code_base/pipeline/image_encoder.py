@@ -18,7 +18,6 @@ class ImgEncoder(nn.Module):
         margin=0.5,
         alpha = 0.0,
         final_layer="arcface",
-        dm = False,
     ):
         super().__init__()
         self.backbone = timm.create_model(backbone, pretrained=pretrained)
@@ -42,7 +41,6 @@ class ImgEncoder(nn.Module):
                 s=self.scale,
                 m=self.margin,
                 alpha=alpha,
-                dynamic_margin=dm,
             )
 
         if final_layer == "currface":
@@ -52,7 +50,6 @@ class ImgEncoder(nn.Module):
                 s=self.scale,
                 m=self.margin,
                 alpha=alpha,
-                dynamic_margin = dm,
             )
 
         self.gem = GeM()

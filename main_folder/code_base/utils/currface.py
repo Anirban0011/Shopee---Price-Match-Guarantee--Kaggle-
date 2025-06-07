@@ -43,6 +43,7 @@ class CurricularFace(nn.Module):
         self.sin_m = math.sin(self.m)
         self.threshold = math.cos(math.pi - self.m)
         self.mm = math.sin(math.pi - self.m) * self.m
+        print(f"margin updated to : {self.m}")
         return None
 
     def forward(self, embbedings, label, epoch):

@@ -55,6 +55,7 @@ class ArcMarginProduct(nn.Module):
         self.sin_m = math.sin(self.m)
         self.th = math.cos(math.pi - self.m)
         self.mm = math.sin(math.pi - self.m) * self.m
+        print(f"margin updated to : {self.m}")
         return None
 
     def forward(self, input, label, epoch):

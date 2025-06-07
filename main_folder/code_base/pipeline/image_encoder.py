@@ -16,7 +16,9 @@ class ImgEncoder(nn.Module):
         dropout=0.5,
         scale=30.0,
         margin=0.5,
+        alpha = 0.0,
         final_layer="arcface",
+        dm = False,
     ):
         super().__init__()
         self.backbone = timm.create_model(backbone, pretrained=pretrained)
@@ -39,6 +41,8 @@ class ImgEncoder(nn.Module):
                 out_features=self.num_classes,
                 s=self.scale,
                 m=self.margin,
+                alpha=alpha,
+                dynamic_margin=dm,
             )
 
         if final_layer == "currface":
@@ -47,6 +51,8 @@ class ImgEncoder(nn.Module):
                 out_features=self.num_classes,
                 s=self.scale,
                 m=self.margin,
+                alpha=alpha,
+                dynamic_margin = dm,
             )
 
         self.gem = GeM()
@@ -55,7 +61,7 @@ class ImgEncoder(nn.Module):
         self.dropout = nn.Dropout2d(p=dropout, inplace=True)
         self.bn2 = nn.BatchNorm1d(self.embed_size)
 
-    def forward(self, x, labels=None):
+    def forward(self, x, labels=None, epoch=0):
         features = self.backbone.forward_features(x)
         # features = self.bn1(features)
         # features = self.dropout(features)
@@ -65,5 +71,5 @@ class ImgEncoder(nn.Module):
         features = self.bn2(features)
         features = F.normalize(features)
         if labels is not None:
-            return self.final(features, labels)
+            return self.final(features, labels, epoch)
         return features

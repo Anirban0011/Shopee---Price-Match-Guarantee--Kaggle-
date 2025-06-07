@@ -4,6 +4,7 @@ import torch.nn as nn
 from torch.nn import Parameter
 import torch.nn.functional as F
 
+
 def l2_norm(input, axis=1):
     norm = torch.norm(input, 2, axis, True)
     output = torch.div(input, norm)
@@ -12,12 +13,22 @@ def l2_norm(input, axis=1):
 
 
 class CurricularFace(nn.Module):
-    def __init__(self, in_features, out_features, m=0.5, s=64.0):
+    def __init__(
+        self,
+        in_features,
+        out_features,
+        m=0.5,
+        s=64.0,
+        alpha=0.0,
+        dynamic_margin=False,
+    ):
         super(CurricularFace, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
         self.m = m
         self.s = s
+        self.alpha = alpha
+        self.dm = dynamic_margin
         self.cos_m = math.cos(m)
         self.sin_m = math.sin(m)
         self.threshold = math.cos(math.pi - m)
@@ -26,10 +37,15 @@ class CurricularFace(nn.Module):
         self.register_buffer("t", torch.zeros(1))
         nn.init.normal_(self.kernel, std=0.01)
 
-    def forward(self, embbedings, label):
-        # embbedings = l2_norm(embbedings, axis=1)
-        # kernel_norm = l2_norm(self.kernel, axis=0)
-        # kernel_norm = self.kernel
+    def update_margin(self, epoch):
+        self.m = self.m + (self.alpha*epoch)
+        self.cos_m = math.cos(self.m)
+        self.sin_m = math.sin(self.m)
+        self.threshold = math.cos(math.pi - self.m)
+        self.mm = math.sin(math.pi - self.m) * self.m
+        return None
+
+    def forward(self, embbedings, label, epoch):
         cos_theta = F.linear(embbedings, F.normalize(self.kernel))
         cos_theta = cos_theta.clamp(-1, 1)  # for numerical stability
         # with torch.no_grad():
@@ -37,6 +53,10 @@ class CurricularFace(nn.Module):
         target_logit = cos_theta[torch.arange(0, embbedings.size(0)), label].view(-1, 1)
 
         sin_theta = torch.sqrt(1.0 - torch.pow(target_logit, 2))
+
+        if self.dm:
+            self.update_margin(epoch)
+
         cos_theta_m = (
             target_logit * self.cos_m - sin_theta * self.sin_m
         )  # cos(target+margin)
@@ -52,4 +72,5 @@ class CurricularFace(nn.Module):
         cos_theta.scatter_(1, label.view(-1, 1).long(), final_target_logit)
         output = cos_theta * self.s
         return output
+
     # , origin_cos * self.s

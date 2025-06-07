@@ -48,7 +48,7 @@ class ArcMarginProduct(nn.Module):
         )
 
     def update_margin(self, epoch):
-        self.m = self.m + (self.alpha*epoch+1)
+        self.m = self.m + (self.alpha*(epoch+1))
         self.cos_m = math.cos(self.m)
         self.sin_m = math.sin(self.m)
         self.th = math.cos(math.pi - self.m)
@@ -56,7 +56,7 @@ class ArcMarginProduct(nn.Module):
         print(f"margin updated to : {self.m}")
         return None
 
-    def forward(self, input, label, epoch):
+    def forward(self, input, label):
         # --------------------------- cos(theta) & phi(theta) ---------------------------
         cosine = F.linear(input, F.normalize(self.weight))
         cosine = cosine.clamp(-1, 1)

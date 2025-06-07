@@ -36,7 +36,7 @@ class CurricularFace(nn.Module):
         nn.init.normal_(self.kernel, std=0.01)
 
     def update_margin(self, epoch):
-        self.m = self.m + (self.alpha*epoch+1)
+        self.m = self.m + (self.alpha*(epoch+1))
         self.cos_m = math.cos(self.m)
         self.sin_m = math.sin(self.m)
         self.threshold = math.cos(math.pi - self.m)
@@ -44,7 +44,7 @@ class CurricularFace(nn.Module):
         print(f"margin updated to : {self.m}")
         return None
 
-    def forward(self, embbedings, label, epoch):
+    def forward(self, embbedings, label):
         cos_theta = F.linear(embbedings, F.normalize(self.kernel))
         cos_theta = cos_theta.clamp(-1, 1)  # for numerical stability
         # with torch.no_grad():

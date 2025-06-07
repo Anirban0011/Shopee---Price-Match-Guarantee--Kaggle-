@@ -58,7 +58,7 @@ class ImgEncoder(nn.Module):
         self.dropout = nn.Dropout2d(p=dropout, inplace=True)
         self.bn2 = nn.BatchNorm1d(self.embed_size)
 
-    def forward(self, x, labels=None, epoch=0):
+    def forward(self, x, labels=None):
         features = self.backbone.forward_features(x)
         # features = self.bn1(features)
         # features = self.dropout(features)
@@ -68,5 +68,5 @@ class ImgEncoder(nn.Module):
         features = self.bn2(features)
         features = F.normalize(features)
         if labels is not None:
-            return self.final(features, labels, epoch)
+            return self.final(features, labels)
         return features

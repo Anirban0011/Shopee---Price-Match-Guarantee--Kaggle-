@@ -19,9 +19,13 @@ class WarmupScheduler(LRScheduler):
     def get_lr(self):
         # backbone warmup schedule
         if self.last_epoch < self.warmup_epochs:
-            return [(self.plateau_lr_backbone) * (self.last_epoch + 1) / self.warmup_epochs] + [
+            return [
+                (self.plateau_lr_backbone) * (self.last_epoch + 1) / self.warmup_epochs
+            ] + [
                 (self.plateau_lr_neck) * (self.last_epoch + 1) / self.warmup_epochs
                 for _ in self.base_lrs[1:]
             ]  # neck warmup schedule
         else:
-            return [self.plateau_lr for _ in self.base_lrs]
+            return [self.plateau_lr_backbone] + [
+                self.plateau_lr_neck for _ in self.base_lrs[1:]
+            ]

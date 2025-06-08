@@ -4,6 +4,7 @@ import torch.nn.functional as F
 from timm.layers import ScaledStdConv2d, ScaledStdConv2dSame, BatchNormAct2d
 from code_base.utils import ArcMarginProduct, CurricularFace
 from .gempool import GeM
+from .depthconv import DepthwiseSeparableConv
 
 
 class ImgEncoder(nn.Module):
@@ -32,7 +33,7 @@ class ImgEncoder(nn.Module):
             kernel_size=1,
         )
 
-        self.fc1 = nn.Linear(self.backbone.num_features, self.embed_size)
+        # self.fc1 = nn.Linear(self.backbone.num_features, self.embed_size)
 
         if final_layer == "arcface":
             self.final = ArcMarginProduct(
@@ -53,18 +54,19 @@ class ImgEncoder(nn.Module):
             )
 
         self.gem = GeM()
-        self.gap = nn.AdaptiveAvgPool2d((1, 1))
-        self.bn1 = nn.BatchNorm2d(self.backbone.num_features)
-        self.dropout = nn.Dropout2d(p=dropout, inplace=True)
-        self.bn2 = nn.BatchNorm1d(self.embed_size)
+        # self.gap = nn.AdaptiveAvgPool2d((1, 1))
+        # self.dropout = nn.Dropout2d(p=dropout, inplace=True)
+        self.depthconv = DepthwiseSeparableConv(in_channels=self.backbone.num_features,
+                                                out_channels=self.embed_size)
+        self.bn = nn.BatchNorm1d(self.embed_size)
 
     def forward(self, x, labels=None):
         features = self.backbone.forward_features(x)
-        features = self.final_conv(features)
-        # features = self.gem(features)
-        features = self.gap(features)
+        features = self.depthconv(features)
+        # features = self.final_conv(features)
+        features = self.gem(features)
         features = features.view(features.size(0), -1)
-        features = self.bn2(features)
+        features = self.bn(features)
         features = F.normalize(features)
         if labels is not None:
             return self.final(features, labels)

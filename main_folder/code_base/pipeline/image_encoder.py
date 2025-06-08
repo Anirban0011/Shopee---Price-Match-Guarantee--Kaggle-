@@ -62,8 +62,7 @@ class ImgEncoder(nn.Module):
 
     def forward(self, x, labels=None):
         features = self.backbone.forward_features(x)
-        features = self.depthconv(features)
-        # features = self.final_conv(features)
+        features = self.final_conv(features)
         features = self.gem(features)
         features = features.view(features.size(0), -1)
         features = self.bn(features)

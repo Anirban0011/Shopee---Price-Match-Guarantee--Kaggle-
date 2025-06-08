@@ -14,7 +14,6 @@ class ImgEncoder(nn.Module):
         embed_size=1792,
         backbone=None,
         pretrained=True,
-        dropout=0.5,
         scale=30.0,
         margin=0.5,
         alpha = 0.0,
@@ -32,8 +31,6 @@ class ImgEncoder(nn.Module):
             self.embed_size,
             kernel_size=1,
         )
-
-        # self.fc1 = nn.Linear(self.backbone.num_features, self.embed_size)
 
         if final_layer == "arcface":
             self.final = ArcMarginProduct(
@@ -54,10 +51,6 @@ class ImgEncoder(nn.Module):
             )
 
         self.gem = GeM()
-        # self.gap = nn.AdaptiveAvgPool2d((1, 1))
-        # self.dropout = nn.Dropout2d(p=dropout, inplace=True)
-        self.depthconv = DepthwiseSeparableConv(in_channels=self.backbone.num_features,
-                                                out_channels=self.embed_size)
         self.bn = nn.BatchNorm1d(self.embed_size)
 
     def forward(self, x, labels=None):

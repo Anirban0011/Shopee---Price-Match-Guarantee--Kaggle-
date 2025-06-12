@@ -21,8 +21,7 @@ class TextEncoder(nn.Module):
     ):
         super().__init__()
         self.backbone_name = backbone
-        self.config = AutoConfig.from_pretrained(backbone)
-        self.backbone = AutoModel.from_config(self.config)
+        self.backbone = AutoModel.from_pretrained(backbone)
         self.out_features = num_classes
         self.embed_size = embed_size
         self.scale = scale

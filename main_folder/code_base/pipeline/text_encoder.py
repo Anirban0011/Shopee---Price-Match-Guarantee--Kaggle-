@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import transformers as tfe
 from transformers import AutoModel, AutoConfig
 from code_base.utils import ArcMarginProduct, CurricularFace
 
@@ -16,6 +17,7 @@ class TextEncoder(nn.Module):
         scale=30.0,
         margin=0.5,
         final_layer="arcface",
+        device="cuda"
     ):
         super().__init__()
         self.backbone_name = backbone
@@ -25,6 +27,7 @@ class TextEncoder(nn.Module):
         self.embed_size = embed_size
         self.scale = scale
         self.margin = margin
+        self.device = device
 
         if final_layer == "arcface":
             self.final = ArcMarginProduct(
@@ -32,6 +35,8 @@ class TextEncoder(nn.Module):
                 out_features=self.out_features,
                 s = self.scale,
                 m=self.margin,
+                device=self.device
+
             )
 
         if final_layer == "currface":

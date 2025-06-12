@@ -18,6 +18,7 @@ class ImgEncoder(nn.Module):
         margin=0.5,
         alpha = 0.0,
         final_layer="arcface",
+        device= "cuda"
     ):
         super().__init__()
         self.backbone = timm.create_model(backbone, pretrained=pretrained)
@@ -25,6 +26,7 @@ class ImgEncoder(nn.Module):
         self.num_classes = num_classes  # num classes
         self.margin = margin
         self.scale = scale
+        self.device = device
 
         self.final_conv = nn.Conv2d(
             self.backbone.num_features,
@@ -39,6 +41,7 @@ class ImgEncoder(nn.Module):
                 s=self.scale,
                 m=self.margin,
                 alpha=alpha,
+                device = self.device
             )
 
         if final_layer == "currface":

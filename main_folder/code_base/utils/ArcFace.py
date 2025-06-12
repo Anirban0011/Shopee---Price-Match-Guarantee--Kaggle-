@@ -24,6 +24,7 @@ class ArcMarginProduct(nn.Module):
         easy_margin=False,
         ls_eps=0.0,
         alpha = 0.0,
+        device = "cuda",
     ):
         super(ArcMarginProduct, self).__init__()
         self.in_features = in_features
@@ -32,6 +33,7 @@ class ArcMarginProduct(nn.Module):
         self.m = m
         self.alpha = alpha
         self.ls_eps = ls_eps  # label smoothing
+        self.device = device
         self.weight = Parameter(torch.FloatTensor(out_features, in_features))
         nn.init.xavier_uniform_(self.weight)
 
@@ -68,7 +70,7 @@ class ArcMarginProduct(nn.Module):
             phi = torch.where(cosine > self.th, phi, cosine - self.mm)
         # --------------------------- convert label to one-hot ---------------------------
         # one_hot = torch.zeros(cosine.size(), requires_grad=True, device='cuda')
-        one_hot = torch.zeros(cosine.size(), device="cuda")
+        one_hot = torch.zeros(cosine.size(), device=self.device)
         one_hot.scatter_(1, label.view(-1, 1).long(), 1)
         if self.ls_eps > 0:
             one_hot = (1 - self.ls_eps) * one_hot + self.ls_eps / self.out_features

@@ -17,11 +17,12 @@ class TextEncoder(nn.Module):
         scale=30.0,
         margin=0.5,
         final_layer="arcface",
-        device="cuda"
+        device="cuda",
     ):
         super().__init__()
         self.backbone_name = backbone
-        self.backbone = AutoModel.from_pretrained(backbone)
+        self.config = AutoConfig.from_pretrained(backbone)
+        self.backbone = AutoModel.from_config(self.config)
         self.out_features = num_classes
         self.embed_size = embed_size
         self.scale = scale
@@ -32,17 +33,16 @@ class TextEncoder(nn.Module):
             self.final = ArcMarginProduct(
                 in_features=self.embed_size,
                 out_features=self.out_features,
-                s = self.scale,
+                s=self.scale,
                 m=self.margin,
-                device=self.device
-
+                device=self.device,
             )
 
         if final_layer == "currface":
             self.final = CurricularFace(
                 in_features=self.embed_size,
                 out_features=self.out_features,
-                s = self.scale,
+                s=self.scale,
                 m=self.margin,
             )
 

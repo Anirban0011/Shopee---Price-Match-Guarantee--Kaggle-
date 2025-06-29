@@ -18,12 +18,12 @@ class TextEncoder(nn.Module):
         margin=0.5,
         final_layer="arcface",
         device="cuda",
-        eval = False,
+        eval_model = False,
         alpha=0.0,
     ):
         super().__init__()
         self.backbone_name = backbone
-        if eval:
+        if eval_model:
             self.config = AutoConfig.from_pretrained(backbone)
             self.backbone = AutoModel.from_config(self.config)
         else:

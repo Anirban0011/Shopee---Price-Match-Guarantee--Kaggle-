@@ -18,7 +18,7 @@ class ImgEncoder(nn.Module):
         margin=0.5,
         alpha = 0.0,
         final_layer="arcface",
-        device= "cuda"
+        device= "cuda",
     ):
         super().__init__()
         self.backbone = timm.create_model(backbone, pretrained=pretrained)

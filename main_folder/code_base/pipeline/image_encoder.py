@@ -1,4 +1,5 @@
 import timm
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from timm.layers import ScaledStdConv2d, ScaledStdConv2dSame, BatchNormAct2d
@@ -16,9 +17,10 @@ class ImgEncoder(nn.Module):
         pretrained=True,
         scale=30.0,
         margin=0.5,
-        alpha = 0.0,
+        alpha=0.0,
         final_layer="arcface",
-        device= "cuda",
+        device="cuda",
+        permute=False,
     ):
         super().__init__()
         self.backbone = timm.create_model(backbone, pretrained=pretrained)
@@ -41,7 +43,7 @@ class ImgEncoder(nn.Module):
                 s=self.scale,
                 m=self.margin,
                 alpha=alpha,
-                device = self.device
+                device=self.device,
             )
 
         if final_layer == "currface":
@@ -55,8 +57,11 @@ class ImgEncoder(nn.Module):
 
         self.gem = GeM()
         self.bn = nn.BatchNorm1d(self.embed_size)
+        self.permute = permute
 
     def forward(self, x, labels=None):
+        if self.permute:
+            x = torch.permute(x, (0, 3, 1, 2))
         features = self.backbone.forward_features(x)
         features = self.final_conv(features)
         features = self.gem(features)

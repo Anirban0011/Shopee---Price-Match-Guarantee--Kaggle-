@@ -60,9 +60,9 @@ class ImgEncoder(nn.Module):
         self.permute = permute
 
     def forward(self, x, labels=None):
-        if self.permute:
-            x = torch.permute(x, (0, 3, 1, 2))
         features = self.backbone.forward_features(x)
+        if self.permute:
+            features = torch.permute(features, (0, 3, 1, 2))
         features = self.final_conv(features)
         features = self.gem(features)
         features = features.view(features.size(0), -1)

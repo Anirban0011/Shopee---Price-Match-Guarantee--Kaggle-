@@ -21,6 +21,7 @@ class ImgEncoder(nn.Module):
         final_layer="arcface",
         device="cuda",
         permute=False,
+        p=3,
     ):
         super().__init__()
         self.backbone = timm.create_model(backbone, pretrained=pretrained)
@@ -29,6 +30,7 @@ class ImgEncoder(nn.Module):
         self.margin = margin
         self.scale = scale
         self.device = device
+        self.p = p
 
         self.final_conv = nn.Conv2d(
             self.backbone.num_features,
@@ -55,7 +57,7 @@ class ImgEncoder(nn.Module):
                 alpha=alpha,
             )
 
-        self.gem = GeM()
+        self.gem = GeM(p=self.p)
         self.bn = nn.BatchNorm1d(self.embed_size)
         self.permute = permute
 

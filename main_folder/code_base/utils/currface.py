@@ -36,7 +36,7 @@ class CurricularFace(nn.Module):
         nn.init.normal_(self.kernel, std=0.01)
 
     def update_margin(self, epoch):
-        m = self.m + (self.alpha*(epoch+1))
+        m = self.m + (self.alpha * (epoch + 1))
         self.cos_m = math.cos(m)
         self.sin_m = math.sin(m)
         self.threshold = math.cos(math.pi - m)

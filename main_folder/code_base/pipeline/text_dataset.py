@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import Dataset
 from transformers import AutoTokenizer
-
+from code_base.utils import clean_text
 
 class SHOPEETextDataset(Dataset):
     def __init__(self, df, tokenizer=None, gen_feat_only=False):
@@ -15,6 +15,7 @@ class SHOPEETextDataset(Dataset):
     def __getitem__(self, index):
         row = self.df.loc[index]
         text = row.title
+        text = clean_text(text)
         text = self.tokenizer(
             text,
             padding="max_length",

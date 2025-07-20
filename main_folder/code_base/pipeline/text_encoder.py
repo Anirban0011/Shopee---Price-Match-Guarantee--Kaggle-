@@ -18,7 +18,7 @@ class TextEncoder(nn.Module):
         margin=0.5,
         final_layer="arcface",
         device="cuda",
-        eval_model = False,
+        eval_model=False,
         alpha=0.0,
     ):
         super().__init__()
@@ -41,7 +41,7 @@ class TextEncoder(nn.Module):
                 s=self.scale,
                 m=self.margin,
                 device=self.device,
-                alpha=alpha
+                alpha=alpha,
             )
 
         if final_layer == "currface":

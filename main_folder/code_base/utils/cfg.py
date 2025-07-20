@@ -1,9 +1,11 @@
 import torch
 
+
 class CFG:
-    r'''
+    r"""
     default config class
-    '''
+    """
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     n_epochs = 5
     fold_id = 0

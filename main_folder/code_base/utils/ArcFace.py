@@ -23,8 +23,8 @@ class ArcMarginProduct(nn.Module):
         m=0.50,
         easy_margin=False,
         ls_eps=0.0,
-        alpha = 0.0,
-        device = "cuda",
+        alpha=0.0,
+        device="cuda",
     ):
         super(ArcMarginProduct, self).__init__()
         self.in_features = in_features
@@ -50,7 +50,7 @@ class ArcMarginProduct(nn.Module):
         )
 
     def update_margin(self, epoch):
-        m = self.m + (self.alpha*(epoch+1))
+        m = self.m + (self.alpha * (epoch + 1))
         self.cos_m = math.cos(m)
         self.sin_m = math.sin(m)
         self.th = math.cos(math.pi - m)

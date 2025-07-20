@@ -5,6 +5,7 @@ from code_base.utils.cfg import CFG
 from code_base.utils.f1_score import row_wise_f1_score
 from sklearn.metrics import f1_score
 
+
 def train_img_model(epoch, dataloader, model, loss_fn, optimizer):
     model.train()
     bar = tqdm.tqdm(dataloader)
@@ -17,7 +18,7 @@ def train_img_model(epoch, dataloader, model, loss_fn, optimizer):
         loss = loss_fn(logits, targets)
         targets = targets.detach().cpu().numpy()
         logits = torch.argmax(logits, 1).detach().cpu().numpy()
-        score = f1_score(targets, logits, average='macro')
+        score = f1_score(targets, logits, average="macro")
         loss.backward()
         optimizer.step()
         print(
@@ -50,7 +51,7 @@ def train_text_model(epoch, dataloader, model, loss_fn, optimizer):
         loss = loss_fn(logits, targets)
         targets = targets.detach().cpu().numpy()
         logits = torch.argmax(logits, 1).detach().cpu().numpy()
-        score = f1_score(targets, logits, average='macro')
+        score = f1_score(targets, logits, average="macro")
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()

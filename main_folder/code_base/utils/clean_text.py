@@ -13,7 +13,7 @@ def clean_text(text):
     text = text.lower()
     text = text.translate(str.maketrans("", "", string.punctuation))
     text = word_tokenize(text)
-    text = [w for w in text if w not in stop_words and len(w) > 1]
+    # text = [w for w in text if w not in stop_words and len(w) > 1]
     return " ".join(text)
 
 

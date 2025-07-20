@@ -4,10 +4,11 @@ from transformers import AutoTokenizer
 from code_base.utils import clean_text
 
 class SHOPEETextDataset(Dataset):
-    def __init__(self, df, tokenizer=None, gen_feat_only=False):
+    def __init__(self, df, tokenizer=None, gen_feat_only=False, clean=False):
         self.df = df
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer)
         self.only_feat = gen_feat_only
+        self.clean = clean
 
     def __len__(self):
         return len(self.df)
@@ -15,7 +16,8 @@ class SHOPEETextDataset(Dataset):
     def __getitem__(self, index):
         row = self.df.loc[index]
         text = row.title
-        text = clean_text(text)
+        if self.clean:
+            text = clean_text(text)
         text = self.tokenizer(
             text,
             padding="max_length",

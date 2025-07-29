@@ -11,9 +11,6 @@ stop_words = set(stopwords.words("english")) | set(stopwords.words("indonesian")
 def clean_text(text):
     text = unidecode(text)
     text = text.lower()
-    text = text.translate(str.maketrans("", "", string.punctuation))
-    text = word_tokenize(text)
-    # text = [w for w in text if w not in stop_words and len(w) > 1]
     return " ".join(text)
 
 
